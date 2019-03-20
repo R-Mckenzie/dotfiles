@@ -47,3 +47,5 @@ prompt simpl
 # system info and AL ascii art
 al-info
 task
+
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"

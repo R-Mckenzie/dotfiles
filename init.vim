@@ -1,23 +1,18 @@
-" Sane vim defaults for ArchLabs
-
 scriptencoding utf8
-
-" Arch defaults
-"runtime! archlinux.vim
-
-" system clipboard (requires +clipboard)
-set clipboard^=unnamed,unnamedplus
 
 call plug#begin('~/.local/share/nvim/plugged')
 Plug 'morhetz/gruvbox'
-Plug 'junegunn/goyo.vim'
-Plug 'tpope/vim-surround'
 Plug 'NLKNguyen/papercolor-theme'
+Plug 'junegunn/goyo.vim'
+Plug 'jiangmiao/auto-pairs'
+Plug 'tpope/vim-surround'
+Plug 'junegunn/fzf.vim'
+Plug 'autozimu/LanguageClient-neovim', {'branch': 'next', 'do': 'bash install.sh'}
+Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
 call plug#end()
 
-
-" additional settings
-" set modeline           " enable vim modelines
+let mapleader=','
+syntax enable
 set hlsearch           " highlight search items
 set incsearch          " searches are performed as you type
 set number             " enable line numbers
@@ -30,15 +25,29 @@ set shortmess+=aAcIws  " Hide or shorten certain messages
 set scrolloff=5
 set showmode
 
-let g:netrw_altv = 1
-let g:netrw_liststyle = 3
-let g:netrw_browse_split = 3
+" ----- status line -----
+function! GitBranch()
+  return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
+endfunction
 
-" ------ leader mapping ------
+function! StatuslineGit()
+  let l:branchname = GitBranch()
+  return strlen(l:branchname) > 0?'  '.l:branchname.' ':''
+endfunction
 
-let mapleader=','
+set statusline+=%#PmenuSel#
+set statusline+=%{StatuslineGit()}
+set statusline+=\|\ %F
+set statusline+=%=
+set statusline+=\ %y
+set statusline+=\ %p%%
+set statusline+=\ \|\ ln\ %l:ch\ %c
+set statusline+=\ 
 
-" ------ enable additional features ------
+" colorscheme
+set t_Co=256
+set background=light
+colorscheme PaperColor
 
 " enable mouse
 set mouse=a
@@ -47,34 +56,14 @@ if has('mouse_sgr')
     set ttymouse=sgr
 endif
 
-" syntax highlighting
-syntax enable
-
 set linebreak breakindent
 set list listchars=tab:>>,trail:~
 
-" colorscheme
-set t_Co=256
-set background=light
-colorscheme PaperColor
-
-if $TERM !=? 'linux'
-    if has('multi_byte') && $TERM !=? 'linux'
-        set listchars=tab:»»,trail:•
-        set fillchars=vert:┃ showbreak=↪
-    endif
-endif
-
-"
-" ------ commands ------
-
-command! D Explore
-command! -nargs=1 B :call <SID>bufferselect("<args>")
-
-" ------ basic maps ------
-
-" jf --> escape
+" jk mapped to escape
 inoremap jk <ESC>
+
+" Deoplete tab to cycle autocompletes
+inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 
 " clear highlighting
 nnoremap <leader><space> :noh<CR>
@@ -87,6 +76,9 @@ map <leader>o :setlocal spell! spelllang=en_gb<CR>
 
 " match string to switch buffer
 nnoremap <Leader>b :let b:buf = input('Match: ')<Bar>call <SID>bufferselect(b:buf)<CR>
+
+" fzf hotkey
+nnoremap <leader>f :FZF<CR>
 
 " change windows with ctrl+(hjkl)
 nnoremap <C-J> <C-W><C-J>
@@ -101,15 +93,7 @@ nmap <buffer><silent><expr>k v:count ? 'k' : 'gk'
 " close current buffer and/or tab
 nnoremap <silent> <Leader>q :B<CR>:silent tabclose<CR>gT
 
-" open a new tab in the current directory with netrw
-nnoremap <silent> <Leader>- :tabedit <C-R>=expand("%:p:h")<CR><CR>
-
-" split the window vertically and horizontally
-nnoremap _ <C-W>s<C-W><Down>
-nnoremap <Bar> <C-W>v<C-W><Right>
-
 " ------ autocmd ------
-
 " Reload changes if file changed outside of vim requires autoread
 augroup load_changed_file
     autocmd!
@@ -141,35 +125,6 @@ if $DISPLAY !=? '' && &t_Co == 256
 endif
 
 " ------ adv maps ------
-
-" strip trailing whitespace, ss (strip space)
-nnoremap <silent> <Leader>ss
-    \ :let b:_p = getpos(".") <Bar>
-    \  let b:_s = (@/ != '') ? @/ : '' <Bar>
-    \  %s/\s\+$//e <Bar>
-    \  let @/ = b:_s <Bar>
-    \  nohlsearch <Bar>
-    \  unlet b:_s <Bar>
-    \  call setpos('.', b:_p) <Bar>
-    \  unlet b:_p <CR>
-
-" quit the current buffer and switch to the next
-" without this vim will leave you on an empty buffer after quiting the current
-function! <SID>quitbuffer() abort
-    let l:bf = bufnr('%')
-    let l:pb = bufnr('#')
-    if buflisted(l:pb)
-        buffer #
-    else
-        bnext
-    endif
-    if bufnr('%') == l:bf
-        new
-    endif
-    if buflisted(l:bf)
-        execute('bdelete! ' . l:bf)
-    endif
-endfunction
 
 " switch active buffer based on pattern matching
 " if more than one match is found then list the matches to choose from
