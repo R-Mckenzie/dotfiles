@@ -6,9 +6,13 @@ Plug 'NLKNguyen/papercolor-theme'
 Plug 'junegunn/goyo.vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'tpope/vim-surround'
-Plug 'junegunn/fzf.vim'
-Plug 'autozimu/LanguageClient-neovim', {'branch': 'next', 'do': 'bash install.sh'}
+Plug 'tpope/vim-fugitive'
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
+Plug 'wokalski/autocomplete-flow'
+Plug 'deoplete-plugins/deoplete-jedi'
+Plug 'Shougo/neosnippet'
+Plug 'Shougo/neosnippet-snippets'
 call plug#end()
 
 let mapleader=','
@@ -24,8 +28,12 @@ set shiftwidth=4       " amount of spaces for indentation
 set shortmess+=aAcIws  " Hide or shorten certain messages
 set scrolloff=5
 set showmode
+set clipboard=unnamedplus
 
-" ----- status line -----
+set linebreak breakindent
+set list listchars=tab:>>,trail:~
+
+"----- status line -----"
 function! GitBranch()
   return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
 endfunction
@@ -43,11 +51,13 @@ set statusline+=\ %y
 set statusline+=\ %p%%
 set statusline+=\ \|\ ln\ %l:ch\ %c
 set statusline+=\ 
+"----- end status line -----"
 
-" colorscheme
+" colorscheme "
 set t_Co=256
 set background=light
 colorscheme PaperColor
+" end colorscheme "
 
 " enable mouse
 set mouse=a
@@ -56,28 +66,45 @@ if has('mouse_sgr')
     set ttymouse=sgr
 endif
 
-set linebreak breakindent
-set list listchars=tab:>>,trail:~
-
-" jk mapped to escape
-inoremap jk <ESC>
-
-" Deoplete tab to cycle autocompletes
+"----deoplete----"
+let g:deoplete#enable_at_startup = 1
+if !exists('g:deoplete#omni#input_patterns')
+      let g:deoplete#omni#input_patterns = {}
+  endif
+  " let g:deoplete#disable_auto_complete = 1
+autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
 inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
+"----end deoplete----"
 
-" clear highlighting
+"----neosnpippet----"
+" Plugin key-mappings.
+" Note: It must be "imap" and "smap".  It uses <Plug> mappings.
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-k>     <Plug>(neosnippet_expand_target)
+
+" SuperTab like snippets behavior.
+" Note: It must be "imap" and "smap".  It uses <Plug> mappings.
+"imap <expr><TAB>
+" \ pumvisible() ? "\<C-n>" :
+" \ neosnippet#expandable_or_jumpable() ?
+" \    "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
+smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+\ "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
+
+" For conceal markers.
+if has('conceal')
+  set conceallevel=2 concealcursor=niv
+endif
+let g:neosnippet#enable_completed_snippet = 1
+"----neosnpippet----"
+
+"----key remaps----"
+inoremap jk <ESC>
 nnoremap <leader><space> :noh<CR>
-
-" goyo to leader+g
 map <Leader>g :Goyo \| set linebreak<CR>
-
-" spelling toggle
 map <leader>o :setlocal spell! spelllang=en_gb<CR>
-
-" match string to switch buffer
 nnoremap <Leader>b :let b:buf = input('Match: ')<Bar>call <SID>bufferselect(b:buf)<CR>
-
-" fzf hotkey
 nnoremap <leader>f :FZF<CR>
 
 " change windows with ctrl+(hjkl)
@@ -89,9 +116,7 @@ nnoremap <C-H> <C-W><C-H>
 " gj/k but preserve numbered jumps ie: 12j or 45k
 nmap <buffer><silent><expr>j v:count ? 'j' : 'gj'
 nmap <buffer><silent><expr>k v:count ? 'k' : 'gk'
-
-" close current buffer and/or tab
-nnoremap <silent> <Leader>q :B<CR>:silent tabclose<CR>gT
+"----end key remaps----"
 
 " ------ autocmd ------
 " Reload changes if file changed outside of vim requires autoread
