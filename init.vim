@@ -3,16 +3,19 @@ scriptencoding utf8
 call plug#begin('~/.local/share/nvim/plugged')
 Plug 'morhetz/gruvbox'
 Plug 'NLKNguyen/papercolor-theme'
+Plug 'altercation/vim-colors-solarized'
 Plug 'junegunn/goyo.vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
-Plug 'wokalski/autocomplete-flow'
-Plug 'deoplete-plugins/deoplete-jedi'
 Plug 'Shougo/neosnippet'
 Plug 'Shougo/neosnippet-snippets'
+Plug 'deoplete-plugins/deoplete-jedi'
+Plug 'scrooloose/syntastic'
+Plug 'mattn/emmet-vim'
 call plug#end()
 
 let mapleader=','
@@ -29,6 +32,8 @@ set shortmess+=aAcIws  " Hide or shorten certain messages
 set scrolloff=5
 set showmode
 set clipboard=unnamedplus
+set updatetime=100
+set omnifunc=syntaxcomplete#Complete
 
 set linebreak breakindent
 set list listchars=tab:>>,trail:~
@@ -43,8 +48,8 @@ function! StatuslineGit()
   return strlen(l:branchname) > 0?'  '.l:branchname.' ':''
 endfunction
 
-set statusline+=%#PmenuSel#
-set statusline+=%{StatuslineGit()}
+set statusline+=%{StatuslineGit()}\ 
+set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=\|\ %F
 set statusline+=%=
 set statusline+=\ %y
@@ -55,8 +60,9 @@ set statusline+=\
 
 " colorscheme "
 set t_Co=256
+let g:solarized_termcolors=256
 set background=light
-colorscheme PaperColor
+colorscheme solarized
 " end colorscheme "
 
 " enable mouse
@@ -75,7 +81,15 @@ if !exists('g:deoplete#omni#input_patterns')
 autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
 inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 "----end deoplete----"
-
+"
+"----syntastic----"
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_enable_signs = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+"----end syntastic----"
+"
 "----neosnpippet----"
 " Plugin key-mappings.
 " Note: It must be "imap" and "smap".  It uses <Plug> mappings.
@@ -116,6 +130,13 @@ nnoremap <C-H> <C-W><C-H>
 " gj/k but preserve numbered jumps ie: 12j or 45k
 nmap <buffer><silent><expr>j v:count ? 'j' : 'gj'
 nmap <buffer><silent><expr>k v:count ? 'k' : 'gk'
+
+" For local replace
+nnoremap gr gd[{V%::s/<C-R>///gc<left><left><left>
+
+" For global replace
+nnoremap gR gD:%s/<C-R>///gc<left><left><left>
+
 "----end key remaps----"
 
 " ------ autocmd ------
