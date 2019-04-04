@@ -2,8 +2,8 @@ scriptencoding utf8
 
 call plug#begin('~/.local/share/nvim/plugged')
 Plug 'morhetz/gruvbox'
-Plug 'NLKNguyen/papercolor-theme'
 Plug 'altercation/vim-colors-solarized'
+Plug 'NLKNguyen/papercolor-theme'
 Plug 'junegunn/goyo.vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'tpope/vim-surround'
@@ -14,7 +14,6 @@ Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
 Plug 'Shougo/neosnippet'
 Plug 'Shougo/neosnippet-snippets'
 Plug 'deoplete-plugins/deoplete-jedi'
-Plug 'scrooloose/syntastic'
 Plug 'mattn/emmet-vim'
 call plug#end()
 
@@ -34,6 +33,7 @@ set showmode
 set clipboard=unnamedplus
 set updatetime=100
 set omnifunc=syntaxcomplete#Complete
+set inccommand=split
 
 set linebreak breakindent
 set list listchars=tab:>>,trail:~
@@ -49,7 +49,6 @@ function! StatuslineGit()
 endfunction
 
 set statusline+=%{StatuslineGit()}\ 
-set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=\|\ %F
 set statusline+=%=
 set statusline+=\ %y
@@ -61,8 +60,16 @@ set statusline+=\
 " colorscheme "
 set t_Co=256
 let g:solarized_termcolors=256
-set background=light
-colorscheme solarized
+
+" background color by time of day
+if strftime("%H") > 7 && strftime("%H") < 19
+    set background=light
+    colorscheme PaperColor
+else
+    set background=dark
+    colorscheme PaperColor
+endif
+
 " end colorscheme "
 
 " enable mouse
@@ -81,15 +88,7 @@ if !exists('g:deoplete#omni#input_patterns')
 autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
 inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 "----end deoplete----"
-"
-"----syntastic----"
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_enable_signs = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-"----end syntastic----"
-"
+
 "----neosnpippet----"
 " Plugin key-mappings.
 " Note: It must be "imap" and "smap".  It uses <Plug> mappings.
@@ -113,6 +112,15 @@ endif
 let g:neosnippet#enable_completed_snippet = 1
 "----neosnpippet----"
 
+"----netrw----"
+let g:netrw_winsize      = 12
+let g:netrw_browse_split = 4
+let g:netrw_banner       = 0
+let g:netrw_keepdir      = 0
+let g:netrw_liststyle    = 3
+let g:netrw_sort_options = 'i'
+"----netrw----"
+
 "----key remaps----"
 inoremap jk <ESC>
 nnoremap <leader><space> :noh<CR>
@@ -132,10 +140,10 @@ nmap <buffer><silent><expr>j v:count ? 'j' : 'gj'
 nmap <buffer><silent><expr>k v:count ? 'k' : 'gk'
 
 " For local replace
-nnoremap gr gd[{V%::s/<C-R>///gc<left><left><left>
+nnoremap <leader>r gd[{V%::s/<C-R>///gc<left><left><left>
 
 " For global replace
-nnoremap gR gD:%s/<C-R>///gc<left><left><left>
+nnoremap <leader>R gD:%s/<C-R>///gc<left><left><left>
 
 "----end key remaps----"
 
