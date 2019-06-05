@@ -1,20 +1,20 @@
 scriptencoding utf8
 
+filetype plugin on
+
 call plug#begin('~/.local/share/nvim/plugged')
-Plug 'morhetz/gruvbox'
-Plug 'altercation/vim-colors-solarized'
 Plug 'NLKNguyen/papercolor-theme'
 Plug 'junegunn/goyo.vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-fugitive'
-Plug 'airblade/vim-gitgutter'
+Plug 'tpope/vim-vinegar'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
+Plug 'junegunn/fzf.vim'
 Plug 'Shougo/neosnippet'
 Plug 'Shougo/neosnippet-snippets'
-Plug 'deoplete-plugins/deoplete-jedi'
 Plug 'mattn/emmet-vim'
+Plug 'neoclide/coc.nvim', {'do': { -> coc#util#install()}}
 call plug#end()
 
 let mapleader=','
@@ -27,39 +27,94 @@ set wildmenu           " Tab completion menu when using command mode
 set expandtab          " Tab key inserts spaces not tabs
 set softtabstop=4      " spaces to enter for each tab
 set shiftwidth=4       " amount of spaces for indentation
-set shortmess+=aAcIws  " Hide or shorten certain messages
 set scrolloff=5
-set showmode
 set clipboard=unnamedplus
 set updatetime=100
-set omnifunc=syntaxcomplete#Complete
 set inccommand=split
+set shortmess+=c
 
-set linebreak breakindent
-set list listchars=tab:>>,trail:~
-
-"----- status line -----"
-function! GitBranch()
-  return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
-endfunction
-
-function! StatuslineGit()
-  let l:branchname = GitBranch()
-  return strlen(l:branchname) > 0?'  '.l:branchname.' ':''
-endfunction
-
-set statusline+=%{StatuslineGit()}\ 
-set statusline+=\|\ %F
+set statusline=%f
+set statusline+=\ %y\ \|\ 
 set statusline+=%=
-set statusline+=\ %y
-set statusline+=\ %p%%
-set statusline+=\ \|\ ln\ %l:ch\ %c
-set statusline+=\ 
-"----- end status line -----"
+set statusline+=%{coc#status()}
+set statusline+=%=
+set statusline+=\ \|\ 
+set statusline+=[col:%c]
+set statusline+=\ [ln\ %l
+set statusline+=/%L]
+
+" use 2 spaces per tab in html
+autocmd FileType html setlocal tabstop=2 shiftwidth=2 softtabstop=2 expandtab
+
+" tab and trailing whitespace indicators
+set linebreak breakindent
+set list listchars=tab:>>,trail:.
+
+"----- Language Client -----"
+set hidden
+set nobackup
+set nowritebackup
+set cmdheight=2
+set signcolumn=yes
+
+" tab to cycle completions
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+inoremap <silent><expr> <c-space> coc#refresh()
+" select completion with enter
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+" Use `[c` and `]c` for navigate diagnostics
+nmap <silent> [c <Plug>(coc-diagnostic-prev)
+nmap <silent> ]c <Plug>(coc-diagnostic-next)
+
+" Remap keys for gotos
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" Use K for show documentation in preview window
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if &filetype == 'vim'
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+" Highlight symbol under cursor on CursorHold
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Remap for rename current word
+nmap <leader>rn <Plug>(coc-rename)
+
+" Remap for format selected region
+vmap <leader>=  <Plug>(coc-format-selected)
+nmap <leader>=  <Plug>(coc-format-selected)
+
+augroup mygroup
+  autocmd!
+  " Setup formatexpr specified filetype(s).
+  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+  " Update signature help on jump placeholder
+  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+augroup end
+"----- Language Client -----"
 
 " colorscheme "
 set t_Co=256
-let g:solarized_termcolors=256
 
 " background color by time of day
 if strftime("%H") > 7 && strftime("%H") < 19
@@ -69,7 +124,6 @@ else
     set background=dark
     colorscheme PaperColor
 endif
-
 " end colorscheme "
 
 " enable mouse
@@ -79,31 +133,14 @@ if has('mouse_sgr')
     set ttymouse=sgr
 endif
 
-"----deoplete----"
-let g:deoplete#enable_at_startup = 1
-if !exists('g:deoplete#omni#input_patterns')
-      let g:deoplete#omni#input_patterns = {}
-  endif
-  " let g:deoplete#disable_auto_complete = 1
-autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
-inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
-"----end deoplete----"
+
 
 "----neosnpippet----"
 " Plugin key-mappings.
 " Note: It must be "imap" and "smap".  It uses <Plug> mappings.
-imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-smap <C-k>     <Plug>(neosnippet_expand_or_jump)
-xmap <C-k>     <Plug>(neosnippet_expand_target)
-
-" SuperTab like snippets behavior.
-" Note: It must be "imap" and "smap".  It uses <Plug> mappings.
-"imap <expr><TAB>
-" \ pumvisible() ? "\<C-n>" :
-" \ neosnippet#expandable_or_jumpable() ?
-" \    "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
-smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-\ "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
+imap <C-k> <Plug>(neosnippet_expand_or_jump)
+smap <C-k> <Plug>(neosnippet_expand_or_jump)
+xmap <C-k> <Plug>(neosnippet_expand_target)
 
 " For conceal markers.
 if has('conceal')
@@ -113,20 +150,21 @@ let g:neosnippet#enable_completed_snippet = 1
 "----neosnpippet----"
 
 "----netrw----"
-let g:netrw_winsize      = 12
-let g:netrw_browse_split = 4
-let g:netrw_banner       = 0
-let g:netrw_keepdir      = 0
-let g:netrw_liststyle    = 3
-let g:netrw_sort_options = 'i'
+"let g:netrw_winsize      = 12
+"let g:netrw_browse_split = 4
+"let g:netrw_banner       = 0
+"let g:netrw_keepdir      = 0
+"let g:netrw_liststyle    = 3
+"let g:netrw_sort_options = 'i'
+
+"nnoremap <leader>e :Vexplore<CR>
 "----netrw----"
 
 "----key remaps----"
 inoremap jk <ESC>
 nnoremap <leader><space> :noh<CR>
-map <Leader>g :Goyo \| set linebreak<CR>
+nnoremap <leader>g :Goyo<CR>
 map <leader>o :setlocal spell! spelllang=en_gb<CR>
-nnoremap <Leader>b :let b:buf = input('Match: ')<Bar>call <SID>bufferselect(b:buf)<CR>
 nnoremap <leader>f :FZF<CR>
 
 " change windows with ctrl+(hjkl)
@@ -139,77 +177,4 @@ nnoremap <C-H> <C-W><C-H>
 nmap <buffer><silent><expr>j v:count ? 'j' : 'gj'
 nmap <buffer><silent><expr>k v:count ? 'k' : 'gk'
 
-" For local replace
-nnoremap <leader>r gd[{V%::s/<C-R>///gc<left><left><left>
-
-" For global replace
-nnoremap <leader>R gD:%s/<C-R>///gc<left><left><left>
-
 "----end key remaps----"
-
-" ------ autocmd ------
-" Reload changes if file changed outside of vim requires autoread
-augroup load_changed_file
-    autocmd!
-    autocmd FocusGained,BufEnter * if mode() !=? 'c' | checktime | endif
-    autocmd FileChangedShellPost * echo "Changes loaded from source file"
-augroup END
-
-" when quitting a file, save the cursor position
-augroup save_cursor_position
-    autocmd!
-    autocmd BufReadPost * call setpos(".", getpos("'\""))
-augroup END
-
-" save and load folds
-augroup remember_folds
-    autocmd!
-    autocmd BufWinLeave * mkview
-    autocmd BufWinEnter * silent! loadview
-augroup END
-
-" when not running in a console or a terminal that doesn't support 256 colors
-" enable cursorline in the currently active window and disable it in inactive ones
-if $DISPLAY !=? '' && &t_Co == 256
-    augroup cursorline
-        autocmd!
-        autocmd VimEnter,WinEnter,BufWinEnter * setlocal cursorline
-        autocmd WinLeave * setlocal nocursorline
-    augroup END
-endif
-
-" ------ adv maps ------
-
-" switch active buffer based on pattern matching
-" if more than one match is found then list the matches to choose from
-function! <SID>bufferselect(pattern) abort
-    let l:bufcount = bufnr('$')
-    let l:currbufnr = 1
-    let l:nummatches = 0
-    let l:matchingbufnr = 0
-    " walk the buffer count
-    while l:currbufnr <= l:bufcount
-        if (bufexists(l:currbufnr))
-            let l:currbufname = bufname(l:currbufnr)
-            if (match(l:currbufname, a:pattern) > -1)
-                echo l:currbufnr.': '.bufname(l:currbufnr)
-                let l:nummatches += 1
-                let l:matchingbufnr = l:currbufnr
-            endif
-        endif
-        let l:currbufnr += 1
-    endwhile
-
-    " only one match
-    if (l:nummatches == 1)
-        execute ':buffer '.l:matchingbufnr
-    elseif (l:nummatches > 1)
-        " more than one match
-        let l:desiredbufnr = input('Enter buffer number: ')
-        if (strlen(l:desiredbufnr) != 0)
-            execute ':buffer '.l:desiredbufnr
-        endif
-    else
-        echoerr 'No matching buffers'
-    endif
-endfunction
