@@ -1,11 +1,11 @@
 [user]
-	email = ross.mckenzie@infostretch.com
+	email = rossmckenzie11@gmail.com
 	name = Ross Mckenzie
 [color]
     ui = auto
 [core]
     editor = nvim
-	autocrlf = true
+	autocrlf = false
 [filter "lfs"]
     smudge = git-lfs smudge -- %f
     process = git-lfs filter-process
@@ -33,7 +33,7 @@
     ds = diff --stat=160,120
     dh1 = diff HEAD~1
 
-    l = "!. ~/.githelpers && pretty_git_log"
+    l = "!. ~/dotfiles/githelpers && pretty_git_log"
     la = !git l --all
     r = !git l -30
     rm = !git r -all
