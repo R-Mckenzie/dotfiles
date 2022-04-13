@@ -1,0 +1,53 @@
+[user]
+	email = ross.mckenzie@infostretch.com
+	name = Ross Mckenzie
+[color]
+    ui = auto
+[core]
+    editor = nvim
+	autocrlf = true
+[filter "lfs"]
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
+    clean = git-lfs clean -- %f
+[alias]
+    whoami = !git config --global user.name && git config --global user.email
+
+    st = status
+    ci = commit
+    co = checkout
+    di = diff
+    dc = diff --cached
+    amend = commit --amend
+    aa = add --all
+    ff = merge --ff-only
+    pullff = pull --ff-only
+    noff = merge --no-ff
+    div = divergence
+    gn = goodness
+    gnc = goodness --cached
+    fa = fetch --all
+    pom = push origin master
+    b = branch
+    ds = diff --stat=160,120
+    dh1 = diff HEAD~1
+
+    l = "!. ~/.githelpers && pretty_git_log"
+    la = !git l --all
+    r = !git l -30
+    rm = !git r -all
+
+[mergetool "nvim"]
+    cmd = nvim -f -c \"Gdiffsplit!\" \"$MERGED\"
+[merge]
+    tool = nvim
+[mergetool]
+    prompt= false
+[credential "https://gitlab.com"]
+	provider = generic
+[difftool "sourcetree"]
+	cmd = '' \"$LOCAL\" \"$REMOTE\"
+[mergetool "sourcetree"]
+	cmd = "'' "
+	trustExitCode = true
