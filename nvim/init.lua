@@ -1,0 +1,11 @@
+------INIT.LUA------
+--------------------
+require('plugins')
+require('keymaps')
+require('statusline')
+require('treesitter')
+require('autopairs')
+require('go')
+require('completion')
+require('settings')
+--------------------
