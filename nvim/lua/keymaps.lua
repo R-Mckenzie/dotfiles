@@ -43,11 +43,11 @@ map('n', '<leader>fb', "<cmd>lua require('telescope.builtin').buffers()<cr>")
 map('n', '<leader>fh', "<cmd>lua require('telescope.builtin').help_tags()<cr>")
 
 -- Nvim lsp
-map('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', { noremap = true, silent = true })
-map('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', { noremap = true, silent = true })
-map('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', { noremap = true, silent = true })
-map('n', '<leader>=', '<cmd>lua vim.lsp.buf.formatting()<CR>', { noremap = true, silent = true })
-map('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', { noremap = true, silent = true })
+map('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+map('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+map('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+map('n', '<leader>=', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+map('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
 
 -- tagbar
 map('n', '<leader>t', ":TagbarToggle<cr>")
