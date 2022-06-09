@@ -27,6 +27,7 @@ return require('packer').startup(function(use)
 	use 'wbthomason/packer.nvim'
 
   -- Colorschemes
+  use 'morhetz/gruvbox'
 	use 'navarasu/onedark.nvim'
   use 'tomasiser/vim-code-dark'
 

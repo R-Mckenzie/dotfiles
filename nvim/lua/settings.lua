@@ -11,7 +11,6 @@ opt.completeopt = 'menuone,noselect'
 opt.number = true
 opt.showmatch = true
 opt.foldmethod = 'marker'
-opt.colorcolumn = '100'
 opt.ignorecase = true
 opt.linebreak = true
 opt.termguicolors = true
