@@ -34,6 +34,7 @@ done
 echo "done"
 
 echo "Moving any existing config files from ~/.config to $olddir"
+mkdir ~/.config
 for file in $config_files; do
     mv ~/.config/$file $olddir
     echo "Creating symlink to $file in .local/src folder."
@@ -42,6 +43,7 @@ done
 echo "done"
 
 echo "Moving any existing src files from ~/.local/src to $olddir"
+mkdir ~/.local/src
 for file in $suckless_src_files; do
     mv ~/.local/src/$file $olddir
     echo "Creating symlink to $file in config folder."
