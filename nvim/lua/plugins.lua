@@ -44,6 +44,7 @@ return require('packer').startup(function(use)
   use "hrsh7th/vim-vsnip"
 	use 'onsails/lspkind-nvim'
 	use {'nvim-treesitter/nvim-treesitter', run = ':TSUpdate'}
+  use "windwp/nvim-ts-autotag"
 
 	use 'preservim/tagbar'
 	use 'junegunn/goyo.vim'
@@ -59,8 +60,6 @@ return require('packer').startup(function(use)
     ft = {'javascript', 'typescript', 'css', 'less', 'scss', 'graphql', 'typescriptreact', 'html'}
   }
   use "windwp/nvim-autopairs" -- Autopairs, integrates with both cmp and treesitter
-
 	use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}}}
-
 
 end)
