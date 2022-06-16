@@ -13,7 +13,7 @@ dir=~/dotfiles
 olddir=~/dotfiles_old
 
 # list of files/folders to symlink in homedir
-home_files="gitconfig"
+home_files="gitconfig zshrc xinitrc"
 config_files="nvim"
 suckless_src_files="dwm st dmenu slstatus"
 
