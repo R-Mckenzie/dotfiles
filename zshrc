@@ -15,5 +15,4 @@ zstyle :compinstall filename '/home/ross/.zshrc'
 autoload -Uz compinit
 compinit
 
-
-# End of lines added by compinstall
+alias ls="ls -la --color=auto"
