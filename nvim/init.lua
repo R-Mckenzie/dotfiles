@@ -6,6 +6,7 @@ require('statusline')
 require('treesitter')
 require('autopairs')
 require('go')
+require('tree')
 require('completion')
 require('settings')
 --------------------

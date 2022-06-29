@@ -54,3 +54,5 @@ map('n', '<leader>t', ":TagbarToggle<cr>")
 
 -- vimwiki
 map('n', '<leader>w', ":VimwikiIndex<cr>")
+
+map('n', '<leader>e', ":NvimTreeToggle<cr>")

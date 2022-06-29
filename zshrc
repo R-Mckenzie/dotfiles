@@ -15,4 +15,4 @@ zstyle :compinstall filename '/home/ross/.zshrc'
 autoload -Uz compinit
 compinit
 
-alias ls="ls -la --color=auto"
+alias ls="ls -l --color=auto"

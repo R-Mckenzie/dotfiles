@@ -26,6 +26,15 @@ packer.init {
 return require('packer').startup(function(use)
 	use 'wbthomason/packer.nvim'
 
+  -- Sidepanel
+  use {
+    'kyazdani42/nvim-tree.lua',
+    requires = {
+      'kyazdani42/nvim-web-devicons',
+    },
+    tag = 'nightly'
+  }
+
   -- Colorschemes
   use 'morhetz/gruvbox'
 	use 'navarasu/onedark.nvim'
@@ -61,5 +70,4 @@ return require('packer').startup(function(use)
   }
   use "windwp/nvim-autopairs" -- Autopairs, integrates with both cmp and treesitter
 	use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}}}
-
 end)
