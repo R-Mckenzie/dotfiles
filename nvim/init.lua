@@ -1,134 +1,137 @@
--- Install packer
-local install_path = vim.fn.stdpath 'data' .. '/site/pack/packer/start/packer.nvim'
-local is_bootstrap = false
-if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-    is_bootstrap = true
-    vim.fn.system { 'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path }
-    vim.cmd [[packadd packer.nvim]]
+-- Install lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable",     -- latest stable release
+    lazypath,
+  })
 end
+vim.opt.rtp:prepend(lazypath)
 
-require('packer').startup(function(use)
-    -- Package manager
-    use 'wbthomason/packer.nvim'
+-- [[ Basic Keymaps ]]
+-- Set <space> as the leader key
+-- See `:help mapleader`
+--  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
+vim.g.mapleader = ','
+vim.g.maplocalleader = ','
 
-    use { -- LSP Configuration & Plugins
-        'neovim/nvim-lspconfig',
-        requires = {
-            -- Automatically install LSPs to stdpath for neovim
-            'williamboman/mason.nvim',
-            'williamboman/mason-lspconfig.nvim',
+-- Colours for orgmode highlighting
+vim.cmd [[highlight Headline1 guibg=#1e2718]]
+vim.cmd [[highlight Headline2 guibg=#21262d]]
+vim.cmd [[highlight CodeBlock guibg=#1c1c1c]]
+vim.cmd [[highlight Dash guibg=#D19A66 gui=bold]]
 
-            -- Useful status updates for LSP
-            'j-hui/fidget.nvim',
+require('lazy').setup({
+  {   -- LSP Configuration & Plugins
+    'neovim/nvim-lspconfig',
+    dependencies = {
+      -- Automatically install LSPs to stdpath for neovim
+      'williamboman/mason.nvim',
+      'williamboman/mason-lspconfig.nvim',
 
-            -- Additional lua configuration, makes nvim stuff amazing
-            'folke/neodev.nvim',
-        },
-    }
+      -- Useful status updates for LSP
+      'j-hui/fidget.nvim',
 
-    use { -- Autocompletion
-        'hrsh7th/nvim-cmp',
-        requires = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
-    }
+      -- Additional lua configuration, makes nvim stuff amazing
+      'folke/neodev.nvim',
+    },
+  },
 
-    use { "windwp/nvim-autopairs",
-        config = function() require("nvim-autopairs").setup {} end
-    }
+  {   -- Autocompletion
+    'hrsh7th/nvim-cmp',
+    dependencies = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
+  },
 
-    use { -- Highlight, edit, and navigate code
-        'nvim-treesitter/nvim-treesitter',
-        run = ':TSUpdate'
-    }
+  {
+    "windwp/nvim-autopairs",
+    config = function() require("nvim-autopairs").setup {} end
+  },
 
-    use { -- Additional text objects via treesitter
-        'nvim-treesitter/nvim-treesitter-textobjects',
-        after = 'nvim-treesitter',
-    }
+  {   -- Highlight, edit, and navigate code
+    'nvim-treesitter/nvim-treesitter',
+    build = ':TSUpdate'
+  },
 
-    -- Git related plugins
-    use 'tpope/vim-fugitive'
-    use 'tpope/vim-rhubarb'
-    use 'lewis6991/gitsigns.nvim'
+  {   -- Additional text objects via treesitter
+    'nvim-treesitter/nvim-treesitter-textobjects',
+  },
 
-    -- Colourschemes
-    use 'tomasiser/vim-code-dark'
-    use { "catppuccin/nvim", as = "catppuccin" }
-    use { 'embark-theme/vim', as = 'embark' }
-    use { 'aktersnurra/no-clown-fiesta.nvim', as = 'noclown' }
-    use { 'bluz71/vim-moonfly-colors', as = 'moonfly' }
+  -- Git related plugins
+  'tpope/vim-fugitive',
+  'tpope/vim-rhubarb',
+  'lewis6991/gitsigns.nvim',
 
-    use {
-        "mcchrish/zenbones.nvim",
-        -- Optionally install Lush. Allows for more configuration or extending the colorscheme
-        -- If you don't want to install lush, make sure to set g:zenbones_compat = 1
-        -- In Vim, compat mode is turned on as Lush only works in Neovim.
-        requires = "rktjmp/lush.nvim"
-    }
-    use 'nvim-lualine/lualine.nvim'           -- Fancier statusline
-    use 'lukas-reineke/indent-blankline.nvim' -- Add indentation guides even on blank lines
-    use 'numToStr/Comment.nvim'               -- "gc" to comment visual regions/lines
+  -- Colourschemes
+  'tomasiser/vim-code-dark',
+  { "catppuccin/nvim",                  name = "catppuccin" },
+  { 'embark-theme/vim',                 name = 'embark' },
+  { 'aktersnurra/no-clown-fiesta.nvim', name = 'noclown' },
+  { 'bluz71/vim-moonfly-colors',        name = 'moonfly' },
+  { "mcchrish/zenbones.nvim",           dependencies = { 'rktjmp/lush.nvim' } },
 
-    use {
-        'nvim-tree/nvim-tree.lua',
-        requires = {
-            'nvim-tree/nvim-web-devicons', -- optional, for file icons
-        },
-        tag = 'nightly'                    -- optional, updated every week. (see issue #1193)
-    }
-    -- Fuzzy Finder (files, lsp, etc)
-    use { 'nvim-telescope/telescope.nvim', branch = '0.1.x', requires = { 'nvim-lua/plenary.nvim' } }
+  'nvim-lualine/lualine.nvim',             -- Fancier statusline
+  'lukas-reineke/indent-blankline.nvim',   -- Add indentation guides even on blank lines
+  'numToStr/Comment.nvim',                 -- "gc" to comment visual regions/lines
 
-    -- Fuzzy Finder Algorithm which requires local dependencies to be built. Only load if `make` is available
-    use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable 'make' == 1 }
+  {
+    'nvim-tree/nvim-tree.lua',
+    version = "*",
+    lazy = false,
+    dependencies = {
+      'nvim-tree/nvim-web-devicons',       -- optional, for file icons
+    },
+    config = function()
+      require("nvim-tree").setup {}
+    end,
+  },
 
-    use { 'nvim-orgmode/orgmode',
-        config = function()
-            require('orgmode').setup {}
-        end
-    }
+  -- Fuzzy Finder (files, lsp, etc)
+  { 'nvim-telescope/telescope.nvim',            branch = '0.1.x', dependencies = { 'nvim-lua/plenary.nvim' } },
 
-    use({
-        "iamcco/markdown-preview.nvim",
-        run = function() vim.fn["mkdp#util#install"]() end,
-    })
+  -- Fuzzy Finder Algorithm which requires local dependencies to be built. Only load if `make` is available
+  { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make',   cond = vim.fn.executable 'make' == 1 },
 
-    -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
-    local has_plugins, plugins = pcall(require, 'custom.plugins')
-    if has_plugins then
-        plugins(use)
+  {
+    'nvim-orgmode/orgmode',
+    config = function()
+      require('orgmode').setup {}
     end
+  },
 
-    if is_bootstrap then
-        require('packer').sync()
+  {
+    "lukas-reineke/headlines.nvim",
+    config = function()
+      require("headlines").setup {
+        org = {
+          headline_highlights = { "Headline1", "Headline2" },
+        },
+      }
+      require("headlines").setup()
+    end,
+  },
+
+  {
+    'akinsho/org-bullets.nvim',
+    config = function()
+      require('org-bullets').setup({})
     end
-end)
+  },
 
--- When we are bootstrapping a configuration, it doesn't
--- make sense to execute the rest of the init.lua.
---
--- You'll need to restart nvim, and then it will work.
-if is_bootstrap then
-    print '=================================='
-    print '    Plugins are being installed'
-    print '    Wait until Packer completes,'
-    print '       then restart nvim'
-    print '=================================='
-    return
-end
-
--- Automatically source and re-compile packer whenever you save this init.lua
-local packer_group = vim.api.nvim_create_augroup('Packer', { clear = true })
-vim.api.nvim_create_autocmd('BufWritePost', {
-    command = 'source <afile> | silent! LspStop | silent! LspStart | PackerCompile',
-    group = packer_group,
-    pattern = vim.fn.expand '$MYVIMRC',
+  {
+    "iamcco/markdown-preview.nvim",
+    build = function() vim.fn["mkdp#util#install"]() end,
+  },
 })
 
 vim.api.nvim_create_autocmd('BufWritePre', {
-    group = vim.api.nvim_create_augroup("savefmt", { clear = true }),
-    callback = function()
-        vim.lsp.buf.format()
-    end,
+  group = vim.api.nvim_create_augroup("savefmt", { clear = true }),
+  callback = function()
+    vim.lsp.buf.format()
+  end,
 })
 
 -- [[ Setting options ]]
@@ -168,13 +171,6 @@ vim.cmd [[colorscheme neobones]]
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
 
--- [[ Basic Keymaps ]]
--- Set <space> as the leader key
--- See `:help mapleader`
---  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
-vim.g.mapleader = ','
-vim.g.maplocalleader = ','
-
 vim.keymap.set('n', '<leader><space>', ':nohl<CR>', { silent = true })
 
 vim.keymap.set('n', '<C-d>', '<C-d>zz', { silent = true })
@@ -194,22 +190,22 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 -- See `:help vim.highlight.on_yank()`
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
 vim.api.nvim_create_autocmd('TextYankPost', {
-    callback = function()
-        vim.highlight.on_yank()
-    end,
-    group = highlight_group,
-    pattern = '*',
+  callback = function()
+    vim.highlight.on_yank()
+  end,
+  group = highlight_group,
+  pattern = '*',
 })
 
 -- Set lualine as statusline
 -- See `:help lualine.txt`
 require('lualine').setup {
-    options = {
-        icons_enabled = false,
-        theme = 'codedark',
-        component_separators = '|',
-        section_separators = '',
-    },
+  options = {
+    icons_enabled = false,
+    theme = 'codedark',
+    component_separators = '|',
+    section_separators = '',
+  },
 }
 
 -- Enable Comment.nvim
@@ -223,26 +219,26 @@ require('ibl').setup {
 -- Gitsigns
 -- See `:help gitsigns.txt`
 require('gitsigns').setup {
-    signs = {
-        add = { text = '|' },
-        change = { text = '|' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
-    },
+  signs = {
+    add = { text = '|' },
+    change = { text = '|' },
+    delete = { text = '_' },
+    topdelete = { text = '‾' },
+    changedelete = { text = '~' },
+  },
 }
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
-    defaults = {
-        mappings = {
-            i = {
-                ['<C-u>'] = false,
-                ['<C-d>'] = false,
-            },
-        },
+  defaults = {
+    mappings = {
+      i = {
+        ['<C-u>'] = false,
+        ['<C-d>'] = false,
+      },
     },
+  },
 }
 
 -- Enable telescope fzf native, if installed
@@ -252,11 +248,11 @@ pcall(require('telescope').load_extension, 'fzf')
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
 vim.keymap.set('n', '<leader>b', require('telescope.builtin').buffers, { desc = '[b] Find existing buffers' })
 vim.keymap.set('n', '<leader>/', function()
-    -- You can pass additional configuration to telescope to change theme, layout, etc.
-    require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-        winblend = 10,
-        previewer = false,
-    })
+  -- You can pass additional configuration to telescope to change theme, layout, etc.
+  require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
+    winblend = 10,
+    previewer = false,
+  })
 end, { desc = '[/] Fuzzily search in current buffer]' })
 
 vim.keymap.set('n', '<leader>ff', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
@@ -272,55 +268,55 @@ vim.keymap.set('n', '<leader>=', ":Format<cr>", {})
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
-    -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'go', 'lua', 'python', 'rust', 'typescript', 'vim' },
+  -- Add languages to be installed here that you want installed for treesitter
+  ensure_installed = { 'c', 'go', 'lua', 'python', 'rust', 'typescript', 'vim' },
 
-    highlight = { enable = true },
-    indent = { enable = true, disable = { 'python' } },
-    textobjects = {
-        select = {
-            enable = true,
-            lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
-            keymaps = {
-                -- You can use the capture groups defined in textobjects.scm
-                ['aa'] = '@parameter.outer',
-                ['ia'] = '@parameter.inner',
-                ['af'] = '@function.outer',
-                ['if'] = '@function.inner',
-                ['ac'] = '@class.outer',
-                ['ic'] = '@class.inner',
-            },
-        },
-        move = {
-            enable = true,
-            set_jumps = true, -- whether to set jumps in the jumplist
-            goto_next_start = {
-                [']m'] = '@function.outer',
-                [']]'] = '@class.outer',
-            },
-            goto_next_end = {
-                [']M'] = '@function.outer',
-                [']['] = '@class.outer',
-            },
-            goto_previous_start = {
-                ['[m'] = '@function.outer',
-                ['[['] = '@class.outer',
-            },
-            goto_previous_end = {
-                ['[M'] = '@function.outer',
-                ['[]'] = '@class.outer',
-            },
-        },
-        swap = {
-            enable = true,
-            swap_next = {
-                ['<leader>a'] = '@parameter.inner',
-            },
-            swap_previous = {
-                ['<leader>A'] = '@parameter.inner',
-            },
-        },
+  highlight = { enable = true },
+  indent = { enable = true, disable = { 'python' } },
+  textobjects = {
+    select = {
+      enable = true,
+      lookahead = true,       -- Automatically jump forward to textobj, similar to targets.vim
+      keymaps = {
+        -- You can use the capture groups defined in textobjects.scm
+        ['aa'] = '@parameter.outer',
+        ['ia'] = '@parameter.inner',
+        ['af'] = '@function.outer',
+        ['if'] = '@function.inner',
+        ['ac'] = '@class.outer',
+        ['ic'] = '@class.inner',
+      },
     },
+    move = {
+      enable = true,
+      set_jumps = true,       -- whether to set jumps in the jumplist
+      goto_next_start = {
+        [']m'] = '@function.outer',
+        [']]'] = '@class.outer',
+      },
+      goto_next_end = {
+        [']M'] = '@function.outer',
+        [']['] = '@class.outer',
+      },
+      goto_previous_start = {
+        ['[m'] = '@function.outer',
+        ['[['] = '@class.outer',
+      },
+      goto_previous_end = {
+        ['[M'] = '@function.outer',
+        ['[]'] = '@class.outer',
+      },
+    },
+    swap = {
+      enable = true,
+      swap_next = {
+        ['<leader>a'] = '@parameter.inner',
+      },
+      swap_previous = {
+        ['<leader>A'] = '@parameter.inner',
+      },
+    },
+  },
 }
 
 -- Diagnostic keymaps
@@ -332,46 +328,46 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
 -- LSP settings.
 --  This function gets run when an LSP connects to a particular buffer.
 local on_attach = function(_, bufnr)
-    -- NOTE: Remember that lua is a real programming language, and as such it is possible
-    -- to define small helper and utility functions so you don't have to repeat yourself
-    -- many times.
-    --
-    -- In this case, we create a function that lets us more easily define mappings specific
-    -- for LSP related items. It sets the mode, buffer and description for us each time.
-    local nmap = function(keys, func, desc)
-        if desc then
-            desc = 'LSP: ' .. desc
-        end
-
-        vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+  -- NOTE: Remember that lua is a real programming language, and as such it is possible
+  -- to define small helper and utility functions so you don't have to repeat yourself
+  -- many times.
+  --
+  -- In this case, we create a function that lets us more easily define mappings specific
+  -- for LSP related items. It sets the mode, buffer and description for us each time.
+  local nmap = function(keys, func, desc)
+    if desc then
+      desc = 'LSP: ' .. desc
     end
 
-    nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-    nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+    vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+  end
 
-    nmap('<leader>gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
-    nmap('<leader>gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-    nmap('<leader>gi', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
-    nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
-    nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
-    nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+  nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
+  nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
 
-    -- See `:help K` for why this keymap
-    nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-    nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+  nmap('<leader>gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
+  nmap('<leader>gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+  nmap('<leader>gi', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
+  nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
+  nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+  nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
-    -- Lesser used LSP functionality
-    nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-    nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
-    nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
-    nmap('<leader>wl', function()
-        print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    end, '[W]orkspace [L]ist Folders')
+  -- See `:help K` for why this keymap
+  nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
+  nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
-    -- Create a command `:Format` local to the LSP buffer
-    vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
-        vim.lsp.buf.format()
-    end, { desc = 'Format current buffer with LSP' })
+  -- Lesser used LSP functionality
+  nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+  nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
+  nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
+  nmap('<leader>wl', function()
+    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+  end, '[W]orkspace [L]ist Folders')
+
+  -- Create a command `:Format` local to the LSP buffer
+  vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
+    vim.lsp.buf.format()
+  end, { desc = 'Format current buffer with LSP' })
 end
 
 -- Enable the following language servers
@@ -380,16 +376,16 @@ end
 --  Add any additional override configuration in the following tables. They will be passed to
 --  the `settings` field of the server config. You must look up that documentation yourself.
 local servers = {
-    clangd = {
-        cmd = {
-            "clangd",
-            "--fallback-style=GNU"
-        }
-    },
-    -- gopls = {},
-    -- pyright = {},
-    -- rust_analyzer = {},
-    -- tsserver = {},
+  clangd = {
+    cmd = {
+      "clangd",
+      "--fallback-style=GNU"
+    }
+  },
+  -- gopls = {},
+  -- pyright = {},
+  -- rust_analyzer = {},
+  -- tsserver = {},
 }
 
 -- Setup neovim lua configuration
@@ -406,26 +402,26 @@ require('mason').setup()
 local mason_lspconfig = require 'mason-lspconfig'
 
 mason_lspconfig.setup {
-    ensure_installed = vim.tbl_keys(servers),
+  ensure_installed = vim.tbl_keys(servers),
 }
 
 mason_lspconfig.setup_handlers {
-    function(server_name)
-        require('lspconfig')[server_name].setup {
-            capabilities = capabilities,
-            on_attach = on_attach,
-            settings = servers[server_name],
-        }
-    end,
+  function(server_name)
+    require('lspconfig')[server_name].setup {
+      capabilities = capabilities,
+      on_attach = on_attach,
+      settings = servers[server_name],
+    }
+  end,
 }
 
 require("lspconfig")["clangd"].setup {
-    clangd = {
-        cmd = {
-            "clangd",
-            "--fallback-style=GNU"
-        }
-    },
+  clangd = {
+    cmd = {
+      "clangd",
+      "--fallback-style=GNU"
+    }
+  },
 }
 
 -- Turn on lsp status information
@@ -436,41 +432,42 @@ local cmp = require 'cmp'
 local luasnip = require 'luasnip'
 
 cmp.setup {
-    snippet = {
-        expand = function(args)
-            luasnip.lsp_expand(args.body)
-        end,
+  snippet = {
+    expand = function(args)
+      luasnip.lsp_expand(args.body)
+    end,
+  },
+  mapping = cmp.mapping.preset.insert {
+    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<CR>'] = cmp.mapping.confirm {
+      behavior = cmp.ConfirmBehavior.Replace,
+      select = true,
     },
-    mapping = cmp.mapping.preset.insert {
-        ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-        ['<C-f>'] = cmp.mapping.scroll_docs(4),
-        ['<CR>'] = cmp.mapping.confirm {
-            behavior = cmp.ConfirmBehavior.Replace,
-            select = true,
-        },
-        ['<Tab>'] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-                cmp.select_next_item()
-            elseif luasnip.expand_or_jumpable() then
-                luasnip.expand_or_jump()
-            else
-                fallback()
-            end
-        end, { 'i', 's' }),
-        ['<S-Tab>'] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-                cmp.select_prev_item()
-            elseif luasnip.jumpable(-1) then
-                luasnip.jump(-1)
-            else
-                fallback()
-            end
-        end, { 'i', 's' }),
-    },
-    sources = {
-        { name = 'nvim_lsp' },
-        { name = 'luasnip' },
-    },
+    ['<Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif luasnip.expand_or_jumpable() then
+        luasnip.expand_or_jump()
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+    ['<S-Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif luasnip.jumpable(-1) then
+        luasnip.jump(-1)
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+  },
+  sources = {
+    { name = 'nvim_lsp' },
+    { name = 'luasnip' },
+    { name = 'orgmode' },
+  },
 }
 
 -- NVIM TREE --
@@ -482,50 +479,27 @@ vim.g.loaded_netrwPlugin = 1
 -- set termguicolors to enable highlight groups
 vim.opt.termguicolors = true
 
--- empty setup using defaults
-require("nvim-tree").setup()
-
--- OR setup with some options
-require("nvim-tree").setup({
-    sort_by = "case_sensitive",
-    view = {
-        width = 30,
-        mappings = {
-            list = {
-                { key = "u", action = "dir_up" },
-            },
-        },
-    },
-    renderer = {
-        group_empty = true,
-    },
-    filters = {
-        dotfiles = true,
-    },
-})
-
-vim.keymap.set('n', '<leader>v', require("nvim-tree").toggle)
-
+vim.keymap.set('n', '<leader>v', ":NvimTreeToggle<CR>")
 
 -- Load custom treesitter grammar for org filetype
 require('orgmode').setup_ts_grammar()
 
 -- Treesitter configuration
 require('nvim-treesitter.configs').setup {
-    -- If TS highlights are not enabled at all, or disabled via `disable` prop,
-    -- highlighting will fallback to default Vim syntax highlighting
-    highlight = {
-        enable = true,
-        -- Required for spellcheck, some LaTex highlights and
-        -- code block highlights that do not have ts grammar
-        additional_vim_regex_highlighting = { 'org' },
-    },
-    ensure_installed = { 'org' }, -- Or run :TSUpdate org
+  -- If TS highlights are not enabled at all, or disabled via `disable` prop,
+  -- highlighting will fallback to default Vim syntax highlighting
+  highlight = {
+    enable = true,
+    -- Required for spellcheck, some LaTex highlights and
+    -- code block highlights that do not have ts grammar
+    additional_vim_regex_highlighting = { 'org' },
+  },
+  ensure_installed = { 'org' },   -- Or run :TSUpdate org
 }
 
 require('orgmode').setup({
-    org_agenda_files = { '~/org/agenda/*' },
-    org_default_notes_file = '~/org/agenda/tasks.org',
+  org_agenda_files = { '~/org/agenda/*' },
+  org_default_notes_file = '~/org/agenda/tasks.org',
 })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
